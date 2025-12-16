@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams Meeting to Chat</title>
+    <!-- Link the external CSS file -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>
+        <div class="icon-teams">T</div>
+        Teams Chat Opener
+    </h1>
+    <p class="subtitle">Paste a messy meeting link below (from Google Calendar or email). We will extract the ID and open the Chat immediately.</p>
+
+    <div class="input-group">
+        <label for="inputLink">Paste Meeting Link</label>
+        <textarea id="inputLink" placeholder="https://www.google.com/url?q=https://teams.microsoft.com/meetingOptions..."></textarea>
+        <div id="errorDisplay" class="status-msg error">
+            <span class="icon-error">
+                <!-- Icon for error -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            </span>
+            No valid Meeting ID found in that text.
+        </div>
+    </div>
+
+    <!-- The onclick handler refers to the function in script.js -->
+    <button class="btn btn-primary" onclick="processAndOpen()">
+        Open Chat &rarr;
+    </button>
+
+    <div id="resultPanel" class="result-panel">
+        <div class="status-msg success">
+            <span class="icon-success">
+                <!-- Icon for success -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </span>
+            Link generated and opened!
+        </div>
+        
+        <label>Generated Deep Link:</label>
+        <div class="link-box" id="outputLink"></div>
+        
+        <div class="action-row">
+            <!-- The onclick handlers refer to the functions in script.js -->
+            <button class="btn btn-secondary" onclick="copyLink()">Copy Link</button>
+            <button class="btn btn-secondary" onclick="resetForm()">Clear</button>
+        </div>
+    </div>
+</div>
+
+<!-- Link the external JavaScript file -->
+<script src="script.js"></script>
+
+</body>
+</html>
