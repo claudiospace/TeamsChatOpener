@@ -1,6 +1,6 @@
 /**
- * Attempts to find the 'meeting_' ID within the messy input link, 
- * constructs the deep link, and attempts to open it.
+ * Attempts to find the full Teams Thread ID within the messy input link, 
+ * constructs the clean deep link, and attempts to open it.
  */
 function processAndOpen() {
     const input = document.getElementById('inputLink').value;
@@ -12,9 +12,7 @@ function processAndOpen() {
         return;
     }
 
-    // 1. Clean and Decode
-    // Recursively decode URL components to handle multiple layers of encoding 
-    // often added by email clients (e.g., Google Calendar link wrappers).
+    // 1. Clean and Decode (Recursively decode to handle multi-layer wrappers like Google Calendar)
     let decoded = input;
     let previous = "";
     let loopLimit = 0;
@@ -29,17 +27,20 @@ function processAndOpen() {
         console.warn("Decoding stopped due to malformed URI component, proceeding with current state.");
     }
 
-    // 2. Extract ID
-    // Searches for the Teams meeting ID pattern: "meeting_" followed by UUID-like structure.
-    const regex = /(meeting_[a-zA-Z0-9-]+)/;
+    // 2. Extract the full Teams Thread ID
+    // We look for the entire thread identifier: 19:meeting_ID@thread.v2
+    // The regex now specifically captures the '19:meeting_' prefix and the '@thread.v2' suffix,
+    // and allows for common URL/Base64 characters (+, /, -, 0-9, a-z, A-Z) in the ID part.
+    const regex = /(19:meeting_[a-zA-Z0-9\-\+\/]+@thread\.v2)/;
     const match = decoded.match(regex);
 
     if (match && match[1]) {
-        const meetingId = match[1];
+        const fullThreadId = match[1];
 
-        // 3. Construct Deep Link
-        // This deep link format targets the meeting's persistent chat thread.
-        const finalLink = `https://teams.microsoft.com/l/chat/19:${meetingId}@thread.v2/conversations?context=%7B%22contextType%22%3A%22chat%22%7D`;
+        // 3. Construct Clean Deep Link
+        // The final link targets the dedicated chat thread using the captured full ID.
+        // This structure is stable and directly opens the chat interface.
+        const finalLink = `https://teams.microsoft.com/l/chat/${fullThreadId}/conversations?context=%7B%22contextType%22%3A%22chat%22%7D`;
 
         // 4. Update UI
         showError(false);
@@ -47,7 +48,6 @@ function processAndOpen() {
         resultPanel.style.display = 'block';
 
         // 5. Attempt Auto-Open
-        // window.open works best when triggered directly by a user click event.
         window.open(finalLink, '_blank');
 
     } else {
@@ -115,9 +115,7 @@ function fallbackCopy(text) {
         setTimeout(() => btn.textContent = originalText, 2000);
     } catch (err) {
         console.error('Fallback copy failed: ', err);
-        // Use custom modal or message if alert() was not forbidden
-        // Since alert() is forbidden, we just log the failure.
-        // console.error("Copy failed. Please manually select and copy the link.");
+        // Logging the failure since alert() is forbidden
     } finally {
         textArea.remove();
     }
