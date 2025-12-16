@@ -29,14 +29,30 @@ function processAndOpen() {
 
     // 2. Extract the full Teams Thread ID
     // We look for the entire thread identifier: 19:meeting_ID@thread.v2
-    // The regex now specifically captures the '19:meeting_' prefix and the '@thread.v2' suffix,
-    // and allows for common URL/Base64 characters (+, /, -, 0-9, a-z, A-Z) in the ID part.
-    const regex = /(19:meeting_[a-zA-Z0-9\-\+\/]+@thread\.v2)/;
+    // The regex is updated to look for the pattern preceded by 'threadId=' or just floating
+    // in the URL. Since the decoding is done recursively, we can rely on finding 
+    // "19:meeting_..." eventually.
+    // The pattern captures '19:' followed by 'meeting_' and the complex Base64 ID, 
+    // ending with '@thread.v2'. The preceding part (like 'threadId=') is optional in the match.
+    // The new regex accounts for both: 
+    // 1. Direct link format: .../l/meetup-join/19%253ameeting_...
+    // 2. Meeting options link format: ...&threadId=19_meeting_...
+    // It captures the ID pattern: (19:meeting_[a-zA-Z0-9\-\+\/]+@thread\.v2)
+    const regex = /(?:threadId=|meetup-join\/|l\/chat\/)?(19[:_]meeting_[a-zA-Z0-9\-\+\/]+@thread\.v2)/;
     const match = decoded.match(regex);
+    
+    let fullThreadId = null;
 
     if (match && match[1]) {
-        const fullThreadId = match[1];
-
+        fullThreadId = match[1];
+        
+        // Handle the case where the ID uses an underscore instead of a colon (common in threadId= format)
+        if (fullThreadId.startsWith("19_")) {
+            fullThreadId = fullThreadId.replace("19_", "19:");
+        }
+    }
+    
+    if (fullThreadId) {
         // 3. Construct Clean Deep Link
         // The final link targets the dedicated chat thread using the captured full ID.
         // This structure is stable and directly opens the chat interface.
